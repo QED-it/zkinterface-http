@@ -1,7 +1,7 @@
 use bulletproofs::r1cs::{R1CSProof, zkinterface_backend};
-use failure::Error;
-use libzmq::{*, prelude::*};
+use failure::{Error, format_err};
 use std::convert::TryInto;
+use std::io::Read;
 use std::thread::sleep;
 use std::time;
 use std::time::Duration;
@@ -9,36 +9,51 @@ use zkinterface::reading::Messages;
 
 fn main() -> Result<(), Error> {
     // Use a system assigned port.
-    let addr: TcpAddr = "127.0.0.1:40001".try_into()?;
+    let addr = "0.0.0.0:40001";
+    println!("Listening on {:?}", addr);
 
-    let server = ServerBuilder::new()
-        .bind(addr)
-        .build()?;
+    rouille::start_server(addr, move |request| {
+        match handle(request) {
+            Ok(res) => rouille::Response::text(res),
+            Err(err) => {
+                println!("Error: {}", err);
+                rouille::Response::text(err.to_string()).with_status_code(500)
+            }
+        }
+    });
+}
 
-    // Retrieve the addr that was assigned.
-    let bound = server.last_endpoint()?;
-    println!("Listening on {:?}", bound);
+fn handle(request: &rouille::Request) -> Result<String, Error> {
+    //println!("URL = {}", request.url());
+    match request.url().as_ref() {
+        "/status" => {
+            Ok("ready".into())
+        }
 
-    loop {
-        // Receive the client request.
-        let msg = server.recv_msg()?;
-        let id = msg.routing_id().unwrap();
+        "/prove" => {
+            let mut data = request.data().unwrap();
+            let mut msg = Vec::<u8>::new();
+            data.read_to_end(&mut msg)?;
 
-        let mut reader = Messages::new(1);
-        reader.push_message(msg.as_bytes().into()).unwrap();
-        let num_constraints = reader.iter_constraints().count();
+            let now = time::Instant::now();
 
-        let now = time::Instant::now();
+            handle_prove(msg)?;
 
-        let proof = zkinterface_backend::prove(&reader).unwrap();
+            //println!("DONE {:?} ", now.elapsed());
+            Ok("ok".into())
+        }
 
-        println!("{:?}", now.elapsed());
-
-        bincode::serialize(&proof).unwrap();
-
-        // Reply to the client.
-        server.route("ok", id)?;
+        _ => Err(format_err!("Unknown endpoint {}", request.url()))
     }
+}
 
-    //Ok(())
+fn handle_prove(msg: Vec<u8>) -> Result<(), Error> {
+    let mut reader = Messages::new(1);
+    reader.push_message(msg).unwrap();
+
+    let proof = zkinterface_backend::prove(&reader).unwrap();
+
+    bincode::serialize(&proof).unwrap();
+
+    Ok(())
 }

@@ -8,7 +8,8 @@ edition = "2018"
 
 [dependencies]
 zkinterface = "1.0.6"
-libzmq = "0.2"
 #bulletproofs = { git = "https://github.com/QED-it/bulletproofs", branch = "zkinterface", features = ["yoloproofs"] }
 bulletproofs = { path = "../../bulletproofs/", features = ["yoloproofs"] }
 bincode = "1"
+rouille = "3.0.0"
+failure = "0.1.6"
