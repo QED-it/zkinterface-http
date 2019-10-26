@@ -1,0 +1,14 @@
+[package]
+name = "bulletproofs-runner"
+version = "0.1.0"
+authors = ["Aurélien Nicolas <aurel@qed-it.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+zkinterface = "1.0.6"
+libzmq = "0.2"
+#bulletproofs = { git = "https://github.com/QED-it/bulletproofs", branch = "zkinterface", features = ["yoloproofs"] }
+bulletproofs = { path = "../../bulletproofs/", features = ["yoloproofs"] }
+bincode = "1"
