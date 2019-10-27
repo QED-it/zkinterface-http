@@ -25,7 +25,18 @@ pub fn run(b: &mut Bencher, command: &str, size: u64) -> Result<(), Error> {
         }
     }
 
-    // Run one test.
+    // Setup.
+    let mut response = client
+        .post(&format!("http://{}/setup", addr))
+        .body(buf.clone())
+        .send()?;
+    if response.status() != reqwest::StatusCode::OK {
+        let body = response.text().unwrap_or("".to_string());
+        println!("WARNING during setup: {:?} {:?}", response, body);
+        // Setup is optional, continue anyway.
+    }
+
+    // A function that requests one proof.
     let iter = || -> Result<(), Error> {
         let mut response = client
             .post(&format!("http://{}/prove", addr))
@@ -33,20 +44,20 @@ pub fn run(b: &mut Bencher, command: &str, size: u64) -> Result<(), Error> {
             .send()?;
 
         if response.status() != reqwest::StatusCode::OK {
-            let body = response.text();
+            let body = response.text().unwrap_or("".to_string());
             return Err(format_err!("{:?} {:?}", response, body));
         }
         Ok(())
     };
 
-    // Measure run time.
+    // Measure average run time to make one proof.
     b.iter(|| {
         match iter() {
             Ok(()) => {}
             Err(err) => {
-                println!("{}", err);
+                println!("ERROR during proving: {}", err);
                 backend_process.kill();
-                panic!("Stopping benchmark due to an error");
+                panic!("Stopping benchmark due to previous error");
             }
         }
     });

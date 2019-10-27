@@ -28,8 +28,8 @@ pub fn make_benchmark_circuit(num_inputs: u64, num_constraints: u64) -> Result<V
             variable_ids: vec![0],
             values: Some(serialize_small(&[1 as u64])),
         },
-        free_variable_id: 1 + VARS_PER_CONSTRAINT * num_constraints,
-        r1cs_generation: true,
+        free_variable_id: VARS_PER_CONSTRAINT * num_constraints,
+        r1cs_generation: false,
         field_maximum: None,
     };
 
@@ -51,15 +51,15 @@ pub fn write_constraints<W: io::Write>(mut writer: W, num_constraints: u64) -> R
     for i in 0..num_constraints {
         let id_offset = i * VARS_PER_CONSTRAINT;
         let lca = VariablesOwned {
-            variable_ids: vec![id_offset + 1, id_offset + 2],
-            values: Some(vec![1]),
+            variable_ids: vec![id_offset + 0, id_offset + 1],
+            values: Some(vec![1, 1]),
         }.build(builder);
         let lcb = VariablesOwned {
-            variable_ids: vec![id_offset + 3],
+            variable_ids: vec![id_offset + 2],
             values: Some(vec![1]),
         }.build(builder);
         let lcc = VariablesOwned {
-            variable_ids: vec![id_offset + 4],
+            variable_ids: vec![id_offset + 3],
             values: Some(vec![1]),
         }.build(builder);
 
@@ -96,13 +96,13 @@ pub fn write_witness<W: io::Write>(mut writer: W, num_constraints: u64) -> Resul
     //     (  2   +   3  ) *   4   =   20
     for i in 0..num_constraints {
         let id = i * VARS_PER_CONSTRAINT;
-        ids.push(id + 1);
+        ids.push(id + 0);
         values.push(2);
-        ids.push(id + 2);
+        ids.push(id + 1);
         values.push(3);
-        ids.push(id + 3);
+        ids.push(id + 2);
         values.push(4);
-        ids.push(id + 4);
+        ids.push(id + 3);
         values.push(20);
     }
 

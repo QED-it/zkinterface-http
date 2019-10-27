@@ -1,0 +1,18 @@
+[package]
+name = "bellman-runner"
+version = "0.1.0"
+authors = ["Aurélien Nicolas <aurel@qed-it.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+zkinterface = "1.0.6"
+#zkinterface_bellman = { git = "https://github.com/QED-it/zkinterface-bellman" }
+rand = "0.4.6"
+pairing = { git = "https://github.com/zcash/librustzcash" } # "0.14.2"
+bellman = { git = "https://github.com/zcash/librustzcash" } # "0.1.0"
+zkinterface_bellman = { path = "../../zkinterface-bellman/" }
+bincode = "1"
+rouille = "3.0.0"
+failure = "0.1.6"

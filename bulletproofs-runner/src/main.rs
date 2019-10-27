@@ -47,13 +47,13 @@ fn handle(request: &rouille::Request) -> Result<String, Error> {
     }
 }
 
-fn handle_prove(msg: Vec<u8>) -> Result<(), Error> {
+fn handle_prove(msg: Vec<u8>) -> Result<Vec<u8>, Error> {
     let mut reader = Messages::new(1);
     reader.push_message(msg).unwrap();
 
     let proof = zkinterface_backend::prove(&reader).unwrap();
 
-    bincode::serialize(&proof).unwrap();
+    let proof_ser = bincode::serialize(&proof).unwrap();
 
-    Ok(())
+    Ok(proof_ser)
 }
