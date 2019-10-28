@@ -1,5 +1,5 @@
 [package]
-name = "bellman-runner"
+name = "bellman-server"
 version = "0.1.0"
 authors = ["Aurélien Nicolas <aurel@qed-it.com>"]
 edition = "2018"
